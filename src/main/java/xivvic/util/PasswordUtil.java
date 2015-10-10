@@ -10,21 +10,28 @@ import org.apache.commons.codec.binary.Base64;
 
 public class PasswordUtil
 {
-	// The higher the number of iterations the more
+	// The higher the number of ITERATIONS the more
 	// expensive computing the hash is for us and
 	// also for an attacker.
-	private static final int iterations	 = 20 * 1000;
-	private static final int saltLen		 = 32;
-	private static final int desiredKeyLen = 256;
+	//
+	private static final String            ALGO = "PBKDF2WithHmacSHA1";
+	private static final int         ITERATIONS = 20 * 1000;
+	private static final int        SALT_LENGTH = 32;
+	private static final int DESIRED_KEY_LENGTH = 256;
 
 	/**
 	 * Computes a salted PBKDF2 hash of given plaintext password suitable for 
 	 * storing in a database. Empty passwords are not supported.
 	 */
-	public static String getSaltedHash(String password) throws Exception
+	public static String getSaltedHash(String password) 
+		throws Exception
 	{
-		byte[] salt = SecureRandom.getInstance("SHA1PRNG").generateSeed(saltLen);
+		String rng_algo = "SHA1PRNG";
+		SecureRandom sr = SecureRandom.getInstance(rng_algo);
+		byte[]     salt = sr.generateSeed(SALT_LENGTH);
+
 		// store the salt with the password
+		//
 		return Base64.encodeBase64String(salt) + "$" + hash(password, salt);
 	}
 
@@ -32,7 +39,8 @@ public class PasswordUtil
 	/**
 	 * Checks whether given plaintext password corresponds to a stored salted hash of the password.
 	 */
-	public static boolean check(String password, String stored) throws Exception
+	public static boolean check(String password, String stored) 
+		throws Exception
 	{
 		String[] saltAndPass = stored.split("\\$");
 		if (saltAndPass.length != 2)
@@ -47,15 +55,17 @@ public class PasswordUtil
 	// using PBKDF2 from Sun, an alternative is https://github.com/wg/scrypt
 	// cf. http://www.unlimitednovelty.com/2012/03/dont-use-bcrypt.html
 	//
-	private static String hash(String password, byte[] salt) throws Exception
+	public static String hash(String password, byte[] salt) throws Exception
 	{
 		if (password == null || password.length() == 0)
 			throw new IllegalArgumentException( "Empty passwords are not supported.");
 
-		SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-		SecretKey      key = f.generateSecret(new PBEKeySpec(password.toCharArray(),
-				salt, iterations, desiredKeyLen));
+		SecretKeyFactory f = SecretKeyFactory.getInstance(ALGO);
+		char[]       chars = password.toCharArray();
+		PBEKeySpec    spec = new PBEKeySpec(chars, salt, ITERATIONS, DESIRED_KEY_LENGTH);
+		SecretKey      key = f.generateSecret(spec);
+		byte[]       bytes = key.getEncoded();
 
-		return Base64.encodeBase64String(key.getEncoded());
+		return Base64.encodeBase64String(bytes);
 	}
 }
