@@ -1,4 +1,4 @@
-package xivvic.util;
+package xivvic.util.password;
 
 import java.security.SecureRandom;
 

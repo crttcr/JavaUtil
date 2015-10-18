@@ -1,6 +1,6 @@
-package xivvic.util;
+package xivvic.util.hex;
 
-public class ByteUtil
+public class HexUtil
 {
 	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
 

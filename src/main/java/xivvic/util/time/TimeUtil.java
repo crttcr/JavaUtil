@@ -1,4 +1,4 @@
-package xivvic.util;
+package xivvic.util.time;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

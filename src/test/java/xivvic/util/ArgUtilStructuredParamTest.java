@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import xivvic.util.arg.ArgUtil;
+
 public class ArgUtilStructuredParamTest
 {
 

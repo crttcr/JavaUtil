@@ -1,4 +1,4 @@
-package xivvic.util;
+package xivvic.util.arg;
 
 import java.util.HashMap;
 import java.util.Map;
