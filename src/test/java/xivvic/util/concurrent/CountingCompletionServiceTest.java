@@ -111,6 +111,42 @@ public class CountingCompletionServiceTest
 		assertEquals(CALL_RESULT, r2);
 	}
 
+	@Test
+	public void onCreate_withMatchedCallsUsingPoll_thenCountsAreCorrect() throws Exception
+	{
+		// Arrange
+		//
+		CountingCompletionService<String> subject = new CountingCompletionService<>(exec);
+		createCallable();
+		createRunnable();
+		createRunnable();
+		Future<String> future = subject.submit(createCallable());
+		String result = future.get();
+
+		// Note this poll has to occur after the future.get() call above
+		// or there is a good chance the completion queue will be empty and
+		// poll will simply return null.
+		//
+		Future<String> f2 = subject.poll();
+		String r2 = f2.get();
+
+		// Act
+		//
+		long  in = subject.inboundCount();
+		long out = subject.outboundCount();
+		boolean incomplete = subject.hasUncompletedTasks();
+
+		// Assert
+		//
+		assertEquals(1L, in);
+		assertEquals(1L, out);
+		assertFalse(incomplete);
+		assertNotNull(result);
+		assertEquals(CALL_RESULT, result);
+		assertNotNull(r2);
+		assertEquals(CALL_RESULT, r2);
+	}
+
 	////////////////////////////////////
 	// Helper Methods                 //
 	////////////////////////////////////

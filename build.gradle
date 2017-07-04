@@ -17,6 +17,7 @@ jar
 
 dependencies 
 {
+	compile 'org.projectlombok:lombok:1.16.16'
 	compile 'org.slf4j:slf4j-api:1.7.7'
 	compile 'commons-codec:commons-codec:1.10'
 

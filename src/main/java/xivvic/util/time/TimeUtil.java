@@ -6,15 +6,19 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.function.Function;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class TimeUtil
 {
-	public static Function<String, Object> textToNanosFunction()
+	public static Function<String, Long> textToNanosFunction()
 	{
-		Function<String, Object> function = (s) ->
+		Function<String, Long> function = (s) ->
 		{
 			if (s == null)
 			{
-				return "null time";
+				log.warn("Null time");
+				return null;
 			}
 
 			Long result = null;
@@ -28,7 +32,8 @@ public class TimeUtil
 			catch(DateTimeParseException e)
 			{
 				String msg = String.format("Parse error for time value: [%s]", s);
-				return msg;
+				log.warn(msg);
+				return null;
 			}
 
 			return result;
@@ -39,18 +44,18 @@ public class TimeUtil
 
 	// Converts a text object to a date, using the supplied formatter
 	//
-	public static Function<String, Object> text2EpochFunction(final DateTimeFormatter fmt)
+	public static Function<String, Long> text2EpochDaysFunction(final DateTimeFormatter fmt)
 	{
 		if (fmt == null)
 		{
 			return null;
 		}
 
-		Function<String, Object> function = (s) ->
+		Function<String, Long> function = (s) ->
 		{
 			if (s == null)
 			{
-				return "null";
+				return null;
 			}
 
 			Long result = null;
@@ -63,7 +68,8 @@ public class TimeUtil
 			catch(DateTimeParseException e)
 			{
 				String msg = String.format("Parse error for date value: [%s]", s);
-				return msg;
+				log.warn(msg);
+				return null;
 			}
 
 			return result;
@@ -74,65 +80,9 @@ public class TimeUtil
 
 	// Converts a text object in the form of ISO_DATE to a number of days in the Unix epoch.
 	//
-	public static Function<String, Object> text2EpochFunction()
+	public static Function<String, Long> text2EpochDaysFunction()
 	{
-		Function<String, Object> function = (s) ->
-		{
-			if (s == null)
-			{
-				return "null";
-			}
-
-			Long result = null;
-			try
-			{
-				DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
-				LocalDate              date = LocalDate.parse(s, formatter);
-
-				result = date.toEpochDay();
-			}
-			catch(DateTimeParseException e)
-			{
-				String msg = String.format("Parse error for date value: [%s]", s);
-				return msg;
-			}
-
-			return result;
-		};
-
-		return function;
+		final DateTimeFormatter fmt = DateTimeFormatter.ISO_LOCAL_DATE;
+		return text2EpochDaysFunction(fmt);
 	}
-
-	// Converts a text object in the form of ISO_DATE to a number of days in the Unix epoch.
-	//
-	public static Function<String, Long> text2EpochFunctionLong()
-	{
-		Function<String, Long> function = (s) ->
-		{
-			if (s == null)
-			{
-				return null;
-			}
-
-			Long result = null;
-			try
-			{
-				DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
-				LocalDate              date = LocalDate.parse(s, formatter);
-
-				result = date.toEpochDay();
-			}
-			catch(DateTimeParseException e)
-			{
-				String msg = String.format("Parse error for date value: [%s]", s);
-				System.err.println(msg);
-				return null;
-			}
-
-			return result;
-		};
-
-		return function;
-	}
-
 }

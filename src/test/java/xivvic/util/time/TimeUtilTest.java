@@ -2,31 +2,54 @@ package xivvic.util.time;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.time.LocalDate;
 import java.util.function.Function;
 
 import org.junit.Test;
 
+
 public class TimeUtilTest
 {
+	@Test
+	public void onText2nanos_withNull_thenReturnNull()
+	{
+		Function<String, Long> f = TimeUtil.textToNanosFunction();
+		assertNull(f.apply(null));
+	}
+
+	@Test
+	public void onText2nanos_withEmptyString_thenReturnNull()
+	{
+		Function<String, Long> f = TimeUtil.textToNanosFunction();
+		assertNull(f.apply(""));
+	}
+
+	@Test
+	public void onText2nanos_withBadFormat_thenReturnNull()
+	{
+		Function<String, Long> f = TimeUtil.textToNanosFunction();
+		assertNull(f.apply("09:40abc"));
+	}
+
 	@Test
 	public void testTextToNanosFunctionHM()
 	{
 		// Arrange
 		//
 		String s ="00:01";
-		Function<String, Object> converter = TimeUtil.textToNanosFunction();
+		Function<String, Long> converter = TimeUtil.textToNanosFunction();
 
 		// Act
 		//
-		Object out = converter.apply(s);
+		Long out = converter.apply(s);
 
 		// Assert
 		//
 		assertNotNull(out);
-		assertTrue(out instanceof Long);
-		assertEquals(60000000000L, out);
+		assertEquals(60000000000L, out.longValue());
 	}
 
 	@Test
@@ -35,75 +58,75 @@ public class TimeUtilTest
 		// Arrange
 		//
 		String s ="00:01:03";
-		Function<String, Object> converter = TimeUtil.textToNanosFunction();
+		Function<String, Long> converter = TimeUtil.textToNanosFunction();
 
 		// Act
 		//
-		Object out = converter.apply(s);
+		Long out = converter.apply(s);
 
 		// Assert
 		//
 		assertNotNull(out);
-		assertTrue(out instanceof Long);
-		assertEquals(63000000000L, out);
+		assertEquals(63000000000L, out.longValue());
 	}
 
 	@Test
-	public void testText2EpochFunctionNull()
+	public void onText2epochLong_withNull_thenReturnNull()
 	{
-		// Arrange
-		//
-		String s = null;
-		Function<String, Object> converter = TimeUtil.text2EpochFunction();
-
-		// Act
-		//
-		Object out = converter.apply(s);
-
-		// Assert
-		//
-		assertNotNull(out);
-		assertTrue(out instanceof String);
-		assertEquals("null", out);
+		Function<String, Long> f = TimeUtil.text2EpochDaysFunction();
+		assertNull(f.apply(null));
 	}
 
 	@Test
-	public void testText2EpochFunction()
+	public void onText2epochLong_withEmptyString_thenReturnNull()
 	{
-		// Arrange
-		//
-		String s ="2015-12-25";
-		Function<String, Object> converter = TimeUtil.text2EpochFunction();
-
-		// Act
-		//
-		Object out = converter.apply(s);
-
-		// Assert
-		//
-		assertNotNull(out);
-		assertTrue(out instanceof Long);
-		assertEquals(16794L, out);
+		Function<String, Long> f = TimeUtil.text2EpochDaysFunction();
+		assertNull(f.apply(""));
 	}
 
 	@Test
-	public void testText2EpochFunctionSingleDigits()
+	public void onText2epochLong_withBadFormat_thenReturnNull()
+	{
+		Function<String, Long> f = TimeUtil.text2EpochDaysFunction();
+		assertNull(f.apply("2017x03x01"));
+	}
+
+	@Test
+	public void onText2epochLong_withT0_thenReturnZero()
 	{
 		// Arrange
 		//
-		String s ="2016-1-2";
-		Function<String, Object> converter = TimeUtil.text2EpochFunction();
+		String epoch = "1970-01-01";
+		Function<String, Long> f = TimeUtil.text2EpochDaysFunction();
 
 		// Act
 		//
-		Object out = converter.apply(s);
+		Long result = f.apply(epoch);
 
 		// Assert
 		//
-		assertNotNull(out);
-		assertTrue(out instanceof String);
-		String t = (String) out;
-		assertTrue(t.startsWith("Parse error"));
+		assertNotNull(result);
+		assertTrue(0L == result);
+	}
+
+	@Test
+	public void onText2epochLong_withNow_thenReturnSecondsSinceEpoch()
+	{
+		// Arrange
+		//
+		LocalDate today = LocalDate.now();
+		Long expected = today.toEpochDay();
+		String s = today.toString();
+		Function<String, Long> f = TimeUtil.text2EpochDaysFunction();
+
+		// Act
+		//
+		Long result = f.apply(s);
+
+		// Assert
+		//
+		assertNotNull(result);
+		assertEquals(expected.longValue(), result.longValue());
 	}
 
 }
