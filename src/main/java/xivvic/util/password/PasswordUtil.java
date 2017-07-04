@@ -12,14 +12,16 @@ import org.apache.commons.codec.binary.Base64;
 
 public class PasswordUtil
 {
+
 	// The higher the number of ITERATIONS the more
 	// expensive computing the hash is for us and
 	// also for an attacker.
 	//
-	private static final String            ALGO = "PBKDF2WithHmacSHA1";
-	private static final int         ITERATIONS = 20 * 1000;
-	private static final int        SALT_LENGTH = 32;
-	private static final int DESIRED_KEY_LENGTH = 256;
+	private static final String     RANDOM_ALGORITHM = "SHA1PRNG";
+	private static final String SECRET_KEY_ALGORITHM = "PBKDF2WithHmacSHA1";
+	private static final int         	     ITERATIONS = 20_000;
+	private static final int             SALT_LENGTH = 32;
+	private static final int      	DESIRED_KEY_LENGTH = 256;
 
 	/**
 	 * Computes a salted PBKDF2 hash of given plaintext password suitable for
@@ -32,22 +34,24 @@ public class PasswordUtil
 			throw new IllegalArgumentException( "Empty passwords are not supported.");
 		}
 
-		String rng_algo = "SHA1PRNG";
 		SecureRandom sr;
 		try
 		{
-			sr = SecureRandom.getInstance(rng_algo);
+			sr = SecureRandom.getInstance(RANDOM_ALGORITHM);
 		}
 		catch (NoSuchAlgorithmException e)
 		{
-			throw new RuntimeException("Standard Hash ALGO not available: " + e.getLocalizedMessage());
+			throw new RuntimeException("Standard RANDOM ALGO not available: " + e.getLocalizedMessage());
 		}
 
-		byte[]     salt = sr.generateSeed(SALT_LENGTH);
+		byte[]    salt = sr.generateSeed(SALT_LENGTH);
+		String    hash = hash(password, salt);
+		String encoded = Base64.encodeBase64String(salt);
 
-		// store the salt with the password
+		// Store the salt with the password
 		//
-		return Base64.encodeBase64String(salt) + "$" + hash(password, salt);
+		String rv = encoded + "$" + hash;
+		return rv;
 	}
 
 
@@ -93,11 +97,11 @@ public class PasswordUtil
 
 		try
 		{
-			SecretKeyFactory kf = SecretKeyFactory.getInstance(ALGO);
-			char[]       chars = password.toCharArray();
-			PBEKeySpec    spec = new PBEKeySpec(chars, salt, ITERATIONS, DESIRED_KEY_LENGTH);
-			SecretKey      key = kf.generateSecret(spec);
-			byte[]       bytes = key.getEncoded();
+			SecretKeyFactory kf = SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM);
+			char[]        chars = password.toCharArray();
+			PBEKeySpec     spec = new PBEKeySpec(chars, salt, ITERATIONS, DESIRED_KEY_LENGTH);
+			SecretKey       key = kf.generateSecret(spec);
+			byte[]        bytes = key.getEncoded();
 
 			return Base64.encodeBase64String(bytes);
 		}
