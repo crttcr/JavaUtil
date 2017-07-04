@@ -1,6 +1,8 @@
 package xivvic.util.password;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -20,14 +22,27 @@ public class PasswordUtil
 	private static final int DESIRED_KEY_LENGTH = 256;
 
 	/**
-	 * Computes a salted PBKDF2 hash of given plaintext password suitable for 
+	 * Computes a salted PBKDF2 hash of given plaintext password suitable for
 	 * storing in a database. Empty passwords are not supported.
 	 */
-	public static String getSaltedHash(String password) 
-		throws Exception
+	public static String getSaltedHash(String password)
 	{
+		if (password == null || password.length() == 0)
+		{
+			throw new IllegalArgumentException( "Empty passwords are not supported.");
+		}
+
 		String rng_algo = "SHA1PRNG";
-		SecureRandom sr = SecureRandom.getInstance(rng_algo);
+		SecureRandom sr;
+		try
+		{
+			sr = SecureRandom.getInstance(rng_algo);
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			throw new RuntimeException("Standard Hash ALGO not available: " + e.getLocalizedMessage());
+		}
+
 		byte[]     salt = sr.generateSeed(SALT_LENGTH);
 
 		// store the salt with the password
@@ -39,13 +54,22 @@ public class PasswordUtil
 	/**
 	 * Checks whether given plaintext password corresponds to a stored salted hash of the password.
 	 */
-	public static boolean check(String password, String stored) 
-		throws Exception
+	public static boolean check(String password, String stored)
 	{
+		if (password == null || password.length() == 0)
+		{
+			throw new IllegalArgumentException( "Empty passwords are not supported.");
+		}
+
+		if (stored == null || stored.length() == 0)
+		{
+			throw new IllegalArgumentException( "Stored value cannot be blank.");
+		}
+
 		String[] saltAndPass = stored.split("\\$");
 		if (saltAndPass.length != 2)
 		{
-			throw new IllegalStateException("The stored password have the form 'salt$hash'");
+			throw new IllegalArgumentException("The stored password have the form 'salt$hash'");
 		}
 
 		String hashOfInput = hash(password, Base64.decodeBase64(saltAndPass[0]));
@@ -55,17 +79,31 @@ public class PasswordUtil
 	// using PBKDF2 from Sun, an alternative is https://github.com/wg/scrypt
 	// cf. http://www.unlimitednovelty.com/2012/03/dont-use-bcrypt.html
 	//
-	public static String hash(String password, byte[] salt) throws Exception
+	public static String hash(String password, byte[] salt)
 	{
 		if (password == null || password.length() == 0)
+		{
 			throw new IllegalArgumentException( "Empty passwords are not supported.");
+		}
 
-		SecretKeyFactory f = SecretKeyFactory.getInstance(ALGO);
-		char[]       chars = password.toCharArray();
-		PBEKeySpec    spec = new PBEKeySpec(chars, salt, ITERATIONS, DESIRED_KEY_LENGTH);
-		SecretKey      key = f.generateSecret(spec);
-		byte[]       bytes = key.getEncoded();
+		if (salt == null || salt.length == 0)
+		{
+			throw new IllegalArgumentException( "Degenerate salt not supported.");
+		}
 
-		return Base64.encodeBase64String(bytes);
+		try
+		{
+			SecretKeyFactory kf = SecretKeyFactory.getInstance(ALGO);
+			char[]       chars = password.toCharArray();
+			PBEKeySpec    spec = new PBEKeySpec(chars, salt, ITERATIONS, DESIRED_KEY_LENGTH);
+			SecretKey      key = kf.generateSecret(spec);
+			byte[]       bytes = key.getEncoded();
+
+			return Base64.encodeBase64String(bytes);
+		}
+		catch (NoSuchAlgorithmException | InvalidKeySpecException e )
+		{
+			throw new RuntimeException(e);
+		}
 	}
 }
