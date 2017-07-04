@@ -8,14 +8,15 @@ import java.util.function.Function;
 
 public class TimeUtil
 {
-
 	public static Function<String, Object> textToNanosFunction()
 	{
 		Function<String, Object> function = (s) ->
 		{
 			if (s == null)
+			{
 				return "null time";
-			
+			}
+
 			Long result = null;
 			try
 			{
@@ -48,8 +49,10 @@ public class TimeUtil
 		Function<String, Object> function = (s) ->
 		{
 			if (s == null)
+			{
 				return "null";
-			
+			}
+
 			Long result = null;
 			try
 			{
@@ -76,8 +79,10 @@ public class TimeUtil
 		Function<String, Object> function = (s) ->
 		{
 			if (s == null)
+			{
 				return "null";
-			
+			}
+
 			Long result = null;
 			try
 			{
@@ -97,6 +102,7 @@ public class TimeUtil
 
 		return function;
 	}
+
 	// Converts a text object in the form of ISO_DATE to a number of days in the Unix epoch.
 	//
 	public static Function<String, Long> text2EpochFunctionLong()
@@ -104,8 +110,10 @@ public class TimeUtil
 		Function<String, Long> function = (s) ->
 		{
 			if (s == null)
+			{
 				return null;
-			
+			}
+
 			Long result = null;
 			try
 			{

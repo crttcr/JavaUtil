@@ -1,25 +1,37 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
+group = 'com.xivvic'
+version = '0.1.0'
 
 repositories 
 {
     mavenCentral()
 }
 
-
-configurations
+jar 
 {
-	capsule
+	baseName = 'java-util'
 }
 
 dependencies 
 {
-	capsule 'co.paralleluniverse:capsule:1.0.1'
-
 	compile 'org.slf4j:slf4j-api:1.7.7'
 	compile 'commons-codec:commons-codec:1.10'
 
 	testCompile 'junit:junit:4.12'
-	testCompile 'org.mockito:mockito-core:2.0.31-beta'
+	testCompile 'org.mockito:mockito-core:2.0+'
+}
+
+publishing 
+{
+	publications 
+	{
+		maven(MavenPublication) 
+		{
+			artifactId 'java-util'
+			from components.java
+		}
+	}
 }

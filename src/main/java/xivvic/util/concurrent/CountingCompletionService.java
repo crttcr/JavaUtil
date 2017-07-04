@@ -8,8 +8,15 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * This class wraps an ExecutorCompletionService and keeps track of the number of jobs submitted and results retrieved.
+ *
+ * @author reid
+ *
+ * @param <V>
+ */
 public class CountingCompletionService<V>
-		extends ExecutorCompletionService<V>
+extends ExecutorCompletionService<V>
 {
 	private final AtomicLong submits = new AtomicLong();
 	private final AtomicLong takes	= new AtomicLong();
@@ -19,12 +26,12 @@ public class CountingCompletionService<V>
 		super(exec);
 	}
 
-	public CountingCompletionService(Executor exec,
-			BlockingQueue<Future<V>> queue)
+	public CountingCompletionService(Executor exec, BlockingQueue<Future<V>> queue)
 	{
 		super(exec, queue);
 	}
 
+	@Override
 	public Future<V> submit(Callable<V> task)
 	{
 		Future<V> future = super.submit(task);
@@ -32,6 +39,7 @@ public class CountingCompletionService<V>
 		return future;
 	}
 
+	@Override
 	public Future<V> submit(Runnable task, V result)
 	{
 		Future<V> future = super.submit(task, result);
@@ -52,7 +60,10 @@ public class CountingCompletionService<V>
 	{
 		Future<V> future = super.poll();
 
-		if (future == null) return null;
+		if (future == null)
+		{
+			return null;
+		}
 
 		takes.incrementAndGet();
 		return future;
@@ -60,11 +71,14 @@ public class CountingCompletionService<V>
 
 	@Override
 	public Future<V> poll(long timeout, TimeUnit unit)
-			throws InterruptedException
+	throws InterruptedException
 	{
 		Future<V> future = super.poll(timeout, unit);
 
-		if (future == null) return null;
+		if (future == null)
+		{
+			return null;
+		}
 
 		takes.incrementAndGet();
 		return future;
@@ -82,12 +96,15 @@ public class CountingCompletionService<V>
 
 	public boolean hasUncompletedTasks()
 	{
-		// synchronized (this)
-		// {
-		long out = takes.get();
-		long  in = submits.get();
+		long in = 0L;
+		long out = 0L;
+
+		synchronized (this)
+		{
+			out = takes.get();
+			in = submits.get();
+		}
 
 		return out < in;
-		// }
 	}
 }

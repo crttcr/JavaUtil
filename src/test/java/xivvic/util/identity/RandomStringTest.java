@@ -1,4 +1,4 @@
-package xivvic.util.concurrent;
+package xivvic.util.identity;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
