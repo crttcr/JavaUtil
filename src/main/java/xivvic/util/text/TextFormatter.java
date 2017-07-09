@@ -15,16 +15,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * TextFormatter provides a variety of methods that are useful for producing
- * specific text transformations, such as an elipsis and fixed size substrings.
+ * TextFormatter provides methods that are useful for producing
+ * special purpose text transformations that can't be found in a
+ * well-supported open source library.
  */
 
 public class TextFormatter
 {
 	private TextFormatter() {}
 
-	//	Static methods
-	//
 	/** boundedSubstrings breaks an input string, the text parameter, into an array
 	 * of substrings. Provided that none of the individual words are longer
 	 * than the specified length, each line returned will have a length less than
@@ -109,24 +108,6 @@ public class TextFormatter
 			start = end;
 			end = it.next();
 		}
-
-		//		int end   = it.preceding(length);
-		//		while (end != BreakIterator.DONE)
-		//		{
-		//			String current = text.substring(start, end);
-		//			list.add(current);
-		//
-		//			start = end;
-		//			if (start + length >= text.length())
-		//			{
-		//				list.add(text.substring(end));
-		//				end = BreakIterator.DONE;
-		//			}
-		//			else
-		//			{
-		//				end = it.preceding(start + length);
-		//			}
-		//		}
 
 		return list.toArray(new String[0]);
 	}
