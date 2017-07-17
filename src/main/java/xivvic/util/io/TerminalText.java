@@ -2,7 +2,8 @@ package xivvic.util.io;
 
 public class TerminalText {
 
-	private TerminalText() throws InstantiationException {
+	private TerminalText() throws InstantiationException
+	{
 		throw new InstantiationException();
 	}
 
