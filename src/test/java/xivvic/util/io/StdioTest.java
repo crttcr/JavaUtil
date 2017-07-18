@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
@@ -532,6 +533,31 @@ public class StdioTest
 		assertEquals(target, choice);
 	}
 
+
+	@Test(expected = NullPointerException.class)
+	public void onPFEVWD_withNullDefault_thenThrowException()
+	{
+		subject.promptForEnumValueWithDefault("Pick one", null);
+	}
+
+	@Test
+	public void onPFEVWD_withNullPrompt_thenUseStandardPrompt()
+	{
+		// Arrange
+		//
+		TimeUnit    dv = TimeUnit.DAYS;
+		String  prompt = "Pick a time unit";
+		InputStream is = inputStreamForString("SECONDS\n");
+		subject        = new Stdio(is, printstream);
+
+		// Act
+		//
+		TimeUnit result = subject.promptForEnumValueWithDefault(prompt, dv);
+
+		// Assert
+		//
+		assertEquals(TimeUnit.SECONDS, result);
+	}
 
 	///////////////////////////////
 	// Helpers                   //

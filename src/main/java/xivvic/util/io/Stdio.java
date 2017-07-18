@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,6 +32,65 @@ public class Stdio
 		try
 		{
 			String line = in.readLine();
+			return line;
+		}
+		catch (Exception e)
+		{
+			String msg = String.format("Error encountered reading from (buffered) InputStream [%s]: %s", in, e.getMessage());
+			log.error(msg);
+			return null;
+		}
+	}
+
+	public String getString(String prompt)
+	{
+		Objects.requireNonNull(prompt);
+
+		if (prompt.trim().length() == 0)
+		{
+			String msg = String.format("A blank string [%s] does not make for an adequate prompt.", prompt);
+			log.error(msg);
+			return null;
+		}
+
+		prompt = prompt.endsWith(" ") ? prompt : prompt + " ";
+
+		try
+		{
+			out.print(prompt);
+			String line = in.readLine();
+			return line;
+		}
+		catch (Exception e)
+		{
+			String msg = String.format("Error encountered reading from (buffered) InputStream [%s]: %s", in, e.getMessage());
+			log.error(msg);
+			return null;
+		}
+	}
+
+	public String getStringWithDefault(String prompt, String dv)
+	{
+		Objects.requireNonNull(prompt);
+		Objects.requireNonNull(dv);
+
+		if (prompt.trim().length() == 0)
+		{
+			String msg = String.format("A blank string [%s] does not make for an adequate prompt.", prompt);
+			log.error(msg);
+			return null;
+		}
+
+		prompt = prompt.endsWith(" ") ? prompt : prompt + " ";
+
+		try
+		{
+			out.print(prompt);
+			String line = in.readLine();
+			if (line == null || line.trim().length() == 0)
+			{
+				return dv;
+			}
 			return line;
 		}
 		catch (Exception e)
@@ -231,6 +291,19 @@ public class Stdio
 		return n.intValue();
 	}
 
+	public Integer getInt(String prompt)
+	{
+		// FIXME PROMPT USER FOR INTEGER VALUE
+		//
+		Number n = getNumber();
+		if (n == null)
+		{
+			return null;
+		}
+
+		return n.intValue();
+	}
+
 	public Float getFloat()
 	{
 		Number n = getNumber();
@@ -251,6 +324,86 @@ public class Stdio
 		}
 
 		return n.doubleValue();
+	}
+
+	public <E extends Enum<E>> E promptForEnumValueWithDefault(String prompt, E dv)
+	{
+		Objects.requireNonNull(dv);
+
+		prompt = isBlank(prompt) ? "Select one of the enumerated values: " : prompt;
+
+		E[]         values = dv.getDeclaringClass().getEnumConstants();
+		List<String> names = new ArrayList<>(values.length);
+
+		int defaultPosition = 0;
+		for (int i = 0; i < values.length; i++)
+		{
+			E item = values[i];
+			names.add(item.name());
+			if (dv == item)
+			{
+				defaultPosition = i;
+			}
+		}
+
+		String answer = getStringFromListWithDefault(names, prompt, defaultPosition);
+
+		for (int i = 0; i < values.length; i++)
+		{
+			E item = values[i];
+			if (answer.equals(item.name()))
+			{
+				return item;
+			}
+		}
+
+		// Should never exit the loop above without finding the chosen item.
+		//
+		return dv;
+	}
+
+	// TODO: Test this method
+	//
+	public <E extends Enum<E>> E promptForEnumValue(String prompt, Class<E> enumClass)
+	{
+		Objects.requireNonNull(enumClass);
+
+		prompt = isBlank(prompt) ? "Select one of the enumerated values: " : prompt;
+
+		E[] values = enumClass.getEnumConstants();
+		List<String> names = new ArrayList<>(values.length);
+
+		for (int i = 0; i < values.length; i++)
+		{
+			E item = values[i];
+			names.add(item.name());
+		}
+
+		String answer = getStringFromList(names, prompt);
+
+		for (int i = 0; i < values.length; i++)
+		{
+			E item = values[i];
+			if (answer.equals(item.name()))
+			{
+				return item;
+			}
+		}
+
+		// Should never exit the loop above without finding the chosen item.
+		//
+		String msg = String.format("Failed to match choice [%s] to one of the values of the [%s] enumerated type", answer, enumClass.getName());
+		throw new RuntimeException(msg);
+	}
+
+	private boolean isBlank(String s)
+	{
+		if (s == null || s.trim().length() == 0)
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	private Integer attemptToRecognizeUserInputAsChoice(List<String> choices, String choice)
