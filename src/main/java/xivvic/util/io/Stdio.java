@@ -1,33 +1,5 @@
 package xivvic.util.io;
 
-// Simple methods for reading from standard system input from the console.
-// These methods will pause and wait for input until ENTER is pressed.
-// The data is converted to the proper type and returned to the caller.
-//
-// A method is provided for each of the data types:
-// int, float, double, char, Number and String
-// The methods assume that each input value is terminated by a newline.
-//
-// If incorrect input is entered, a value of 0 or '\n' is returned, as applicable.
-//
-// Author history:
-// 1998 Fall Charlie Clarke - original inception
-// 1999 Spring Guy Lemieux - cleanup, restructured code, added a few methods
-// 1999 Fall Anthony Cox - made Reader variables static to permit piping input
-// Our latest email addresses or home pages are readily found using
-// standard web search engines.
-//
-// Please feel free to use this code for your own Java programs,
-// but we would appreciate it if you retain the credit to our names
-// below. This way, you are acknowledging the true source of your
-// code, and it will allow others to get the latest version from us.
-//
-// Thank you.
-//
-//
-// CRT: Modified
-//
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,29 +8,73 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Objects;
 
-public class Stdin
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class Stdio
 {
 	public static String DEFAULT_CONFIRM_PROMPT = "Are you sure? ";
 
 	private final BufferedReader in;
 	private final PrintStream out;
-	public Stdin(InputStream is, PrintStream out)
+	public Stdio(InputStream in, PrintStream out)
 	{
-		Objects.requireNonNull(is);
-		this.out = Objects.requireNonNull(out);
-		this.in  = new BufferedReader(new InputStreamReader(is));
+		Objects.requireNonNull(in);
+		Objects.requireNonNull(out);
+
+		this.in  = new BufferedReader(new InputStreamReader(in));
+		this.out = out;
 	}
 
 	public String getString()
 	{
 		try
 		{
-			return in.readLine();
+			String line = in.readLine();
+			return line;
 		}
 		catch (Exception e)
 		{
-			out.println("getString() exception, returning empty string");
-			return "";
+			String msg = String.format("Error encountered reading from (buffered) InputStream [%s]: %s", in, e.getMessage());
+			log.error(msg);
+			return null;
+		}
+	}
+
+	public String getStringFromList(List<String> choices, String prompt)
+	{
+		Objects.requireNonNull(choices);
+
+		if (choices.size() == 0)
+		{
+			return null;
+		}
+
+		if (prompt == null || prompt.trim().length() == 0)
+		{
+			prompt = "Chose among the following items: ";
+		}
+
+		String fmt = "%2d -- %s\n";
+
+		while (true)
+		{
+			out.print(prompt);
+			for (int i = 0; i < choices.size(); i++)
+			{
+				out.printf(fmt, i, choices.get(i));
+			}
+
+			out.print("Selection --> ");
+
+			String choice = getString();
+			Integer index = attemptToRecognizeUserInputAsChoice(choices, choice);
+			if (index != null)
+			{
+				return choices.get(index);
+			}
+
+			out.printf("Response [%s] is not valid. Choose another item or its index", choice);
 		}
 	}
 
@@ -103,7 +119,7 @@ public class Stdin
 			Integer index = attemptToRecognizeUserInputAsChoice(choices, choice);
 			if (index != null)
 			{
-				return choices.get(index.intValue());
+				return choices.get(index);
 			}
 
 			out.printf("Response [%s] is not valid. Choose another item or its index", choice);
@@ -187,43 +203,54 @@ public class Stdin
 		}
 	}
 
-	// Read a Number as a String from standard system input
-	// Return the Number
-	//
 	public Number getNumber()
 	{
-		String numberString = getString();
+		String s = getString();
 		try
 		{
-			numberString = numberString.trim().toUpperCase();
-			return NumberFormat.getInstance().parse(numberString);
+			String  trim = s.trim();
+			String upper = trim.toUpperCase();
+
+			return NumberFormat.getInstance().parse(upper);
 		}
 		catch (Exception e)
 		{
-			// if any exception occurs, just give a 0 back
-			//
-			// ^^^
-			// This is a dubious strategy, that was part of the original
-			// implementation. Will need to consider a better approach.
-			//
 			out.println("getNumber() exception, returning 0");
-			return new Integer(0);
+			return null;
 		}
 	}
 
-	public int getInt()
+	public Integer getInt()
 	{
-		return getNumber().intValue();
+		Number n = getNumber();
+		if (n == null)
+		{
+			return null;
+		}
+
+		return n.intValue();
 	}
 
-	public float getFloat()
+	public Float getFloat()
 	{
-		return getNumber().floatValue();
+		Number n = getNumber();
+		if (n == null)
+		{
+			return null;
+		}
+
+		return n.floatValue();
 	}
 
-	public double getDouble()
+	public Double getDouble()
 	{
-		return getNumber().doubleValue();
+		Number n = getNumber();
+		if (n == null)
+		{
+			return null;
+		}
+
+		return n.doubleValue();
 	}
 
 	private Integer attemptToRecognizeUserInputAsChoice(List<String> choices, String choice)
