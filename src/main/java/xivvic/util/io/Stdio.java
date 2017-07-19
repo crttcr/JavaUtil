@@ -4,12 +4,14 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
+import xivvic.util.file.FileUtil;
 
 @Slf4j
 public class Stdio
@@ -362,8 +364,6 @@ public class Stdio
 		return dv;
 	}
 
-	// TODO: Test this method
-	//
 	public <E extends Enum<E>> E promptForEnumValue(String prompt, Class<E> enumClass)
 	{
 		Objects.requireNonNull(enumClass);
@@ -394,6 +394,50 @@ public class Stdio
 		//
 		String msg = String.format("Failed to match choice [%s] to one of the values of the [%s] enumerated type", answer, enumClass.getName());
 		throw new RuntimeException(msg);
+	}
+
+	public String promptForFileMatchingPattern(String prompt, Path path, String ... patterns)
+	{
+		Objects.requireNonNull(path);
+
+		if (patternArgumentIsNotValid(patterns))
+		{
+			throw new IllegalArgumentException("Patterns requires a least one pattern an no null values");
+		}
+
+		List<String> files = FileUtil.filesMatchingPatterns(path, patterns, false);
+
+		if (files.isEmpty())
+		{
+			return null;
+		}
+
+		String choice = getStringFromList(files, prompt);
+
+		return choice;
+	}
+
+	private boolean patternArgumentIsNotValid(String[] patterns)
+	{
+		if (patterns == null)
+		{
+			return false;
+		}
+
+		if (patterns.length == 0)
+		{
+			return false;
+		}
+
+		for (int i = 0; i < patterns.length; i++)
+		{
+			if (patterns[i] == null)
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private boolean isBlank(String s)

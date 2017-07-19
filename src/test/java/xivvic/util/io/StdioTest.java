@@ -557,7 +557,59 @@ public class StdioTest
 		// Assert
 		//
 		assertEquals(TimeUnit.SECONDS, result);
+		assertTrue(out_bytes.toString().contains("Select"));
 	}
+
+	@Test(expected = NullPointerException.class)
+	public void onPFE_withNullEnum_thenThrowException()
+	{
+		assertNull(subject.promptForEnumValue("Pick", null));
+	}
+
+	@Test
+	public void onPFEV_withNullPrompt_thenUseStandardPrompt()
+	{
+		// Arrange
+		//
+		String  prompt = "Pick a time unit";
+		InputStream is = inputStreamForString("SECONDS\n");
+		subject        = new Stdio(is, printstream);
+
+		// Act
+		//
+		TimeUnit result = subject.promptForEnumValue(prompt, TimeUnit.class);
+
+		// Assert
+		//
+		assertEquals(TimeUnit.SECONDS, result);
+		assertTrue(out_bytes.toString().contains("Select"));
+	}
+
+	@Test
+	public void onPFEV_withEventualGoodAnswer_thenReturnNull()
+	{
+		// Arrange
+		//
+		String  prompt = "Pick a time unit";
+		InputStream is = inputStreamForString("CATS\nDOGS\nHOURS");
+		subject        = new Stdio(is, printstream);
+
+		// Act
+		//
+		TimeUnit result = subject.promptForEnumValue(prompt, TimeUnit.class);
+
+		// Assert
+		//
+		assertNotNull(result);
+		assertEquals(TimeUnit.HOURS, result);
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void onPFFMP_withNullPath_thenThrowException()
+	{
+		subject.promptForFileMatchingPattern("Pick", null, "*.txt");
+	}
+
 
 	///////////////////////////////
 	// Helpers                   //
