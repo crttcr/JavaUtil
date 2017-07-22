@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -74,6 +77,153 @@ public class StdioTest
 	@Test(expected = NullPointerException.class)
 	public void onCreate_withNullPrintstream_thenThrowException() {
 		new Stdio(System.in, null);
+	}
+
+	@Test
+	public void onGetString_withPrompt_whenInputStreamThrows_thenReturnNull() {
+		// Arrange
+		//
+		String prompt = "Enter a string";
+		configureMockInputStreamToThrowOnRead();
+		subject = new Stdio(mock_input, System.out);
+
+		// Act
+		//
+		String s = subject.getString(prompt);
+
+		// Assert
+		//
+		assertNull(s);
+	}
+
+	@Test
+	public void onGetString_withEmptyPrompt_thenReturnNull() {
+		// Arrange
+		//
+		String prompt = "";
+		subject = new Stdio(mock_input, System.out);
+
+		// Act
+		//
+		String s = subject.getString(prompt);
+
+		// Assert
+		//
+		assertNull(s);
+	}
+
+	@Test
+	public void onGetString_withPrompt_thenPrintPrompt() {
+		// Arrange
+		//
+		String prompt = "Enter a string:";
+
+		// Act
+		//
+		String s = subject.getString(prompt);
+		String output = out_bytes.toString();
+
+		// Assert
+		//
+		assertNotNull(s);
+		assertTrue(output.contains(prompt));
+	}
+
+	@Test
+	public void onGetString_withPromptAndYesResponse_thenReturnYes() {
+		// Arrange
+		//
+		String prompt = "Enter a string: ";
+
+		// Act
+		//
+		String s = subject.getString(prompt);
+
+		// Assert
+		//
+		assertNotNull(s);
+		assertTrue("yes".equals(s));
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void onGetStringWithDefault_havingNullDefault_thenThrowException() {
+		subject.getStringWithDefault("Enter string: ", null);
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void onGetStringWithDefault_havingNullPrompt_thenThrowException() {
+		subject.getStringWithDefault(null, "something");
+	}
+
+	@Test
+	public void onGetStringWithDefault_whenInputStreamThrows_thenReturnNull() {
+		// Arrange
+		//
+		configureMockInputStreamToThrowOnRead();
+		subject = new Stdio(mock_input, printstream);
+
+		// Act
+		//
+		String s = subject.getStringWithDefault("Enter string", "default");
+
+		// Assert
+		//
+		assertNull(s);
+	}
+
+	@Test
+	public void onGetStringWithDefault_withEmptyPrompt_thenReturnNull() {
+		// Arrange
+		//
+		String prompt = "";
+		subject = new Stdio(mock_input, System.out);
+
+		// Act
+		//
+		String s = subject.getStringWithDefault(prompt, "Happy");
+
+		// Assert
+		//
+		assertNull(s);
+	}
+
+	@Test
+	public void onGetStringWithDefault_withEmptyResponse_thenReturnDefault() {
+		// Arrange
+		//
+		String prompt = "Enter a string: ";
+		String     dv = "My Default Value";
+		InputStream is = inputStreamForString("  ");
+		subject = new Stdio(is, printstream);
+
+		// Act
+		//
+		String s = subject.getStringWithDefault(prompt, dv);
+
+		// Assert
+		//
+		assertNotNull(s);
+		assertEquals(dv, s);
+	}
+
+	@Test
+	public void onGetStringWithDefault_withResponse_thenReturnResponse() {
+		// Arrange
+		//
+		String prompt = "Enter a string: ";
+		String     dv = "My Default Value";
+		String expect = "A response Bunko";
+		InputStream is = inputStreamForString(expect);
+		subject = new Stdio(is, printstream);
+
+		// Act
+		//
+		String s = subject.getStringWithDefault(prompt, dv);
+
+		// Assert
+		//
+		assertNotNull(s);
+		assertEquals(expect, s);
 	}
 
 	@Test
@@ -331,7 +481,7 @@ public class StdioTest
 
 		// Act
 		//
-		int result = subject.getInt();
+		int result = subject.getInteger();
 
 		// Assert
 		//
@@ -561,13 +711,13 @@ public class StdioTest
 	}
 
 	@Test(expected = NullPointerException.class)
-	public void onPFE_withNullEnum_thenThrowException()
+	public void onGetEnum_withNullEnum_thenThrowException()
 	{
-		assertNull(subject.promptForEnumValue("Pick", null));
+		assertNull(subject.getEnum("Pick", null));
 	}
 
 	@Test
-	public void onPFEV_withNullPrompt_thenUseStandardPrompt()
+	public void onGetEnum_withNullPrompt_thenUseStandardPrompt()
 	{
 		// Arrange
 		//
@@ -577,7 +727,7 @@ public class StdioTest
 
 		// Act
 		//
-		TimeUnit result = subject.promptForEnumValue(prompt, TimeUnit.class);
+		TimeUnit result = subject.getEnum(prompt, TimeUnit.class);
 
 		// Assert
 		//
@@ -586,7 +736,7 @@ public class StdioTest
 	}
 
 	@Test
-	public void onPFEV_withEventualGoodAnswer_thenReturnNull()
+	public void onGetEnum_withEventualGoodAnswer_thenReturnNull()
 	{
 		// Arrange
 		//
@@ -596,7 +746,7 @@ public class StdioTest
 
 		// Act
 		//
-		TimeUnit result = subject.promptForEnumValue(prompt, TimeUnit.class);
+		TimeUnit result = subject.getEnum(prompt, TimeUnit.class);
 
 		// Assert
 		//
@@ -605,9 +755,48 @@ public class StdioTest
 	}
 
 	@Test(expected = NullPointerException.class)
-	public void onPFFMP_withNullPath_thenThrowException()
+	public void onGFMP_withNullPath_thenThrowException()
 	{
-		subject.promptForFileMatchingPattern("Pick", null, "*.txt");
+		subject.getFileMatchingPattern("Pick", null, "*.txt");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void onGFMP_withNullPattern_thenThrowException()
+	{
+		String[] p = null;
+		subject.getFileMatchingPattern("Pick", Paths.get("/tmp"), p);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void onGFMP_withEmptyPattern_thenThrowException()
+	{
+		String[] p = {};
+		subject.getFileMatchingPattern("Pick", Paths.get("/tmp"), p);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void onGFMP_withPatternContainingNull_thenThrowException()
+	{
+		String[] np = { "*.properties", null, "*.text"} ;
+		subject.getFileMatchingPattern("Pick", Paths.get("/tmp"), np);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void onGFMP_withEmptyDirectory_thenThrowException() throws Exception
+	{
+		// Arrange
+		//
+		String[] patterns = { "*.properties", "*.text"} ;
+		String     prompt = "Pick a file";
+		Path         temp = Files.createTempDirectory (this.getClass().getName());
+
+		// Act
+		//
+		String result = subject.getFileMatchingPattern(prompt, temp, patterns);
+
+		// Assert
+		//
+		assertNull(result);
 	}
 
 

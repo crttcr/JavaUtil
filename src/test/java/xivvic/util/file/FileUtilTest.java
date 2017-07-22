@@ -4,9 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -161,6 +165,24 @@ public class FileUtilTest
 	public void onString2file_withNullChannel_thenThrowException()
 	{
 		FileUtil.string2file("abc", null);
+	}
+
+	@Test
+	public void onString2file_withChannelThatThrowsException_thenReturnZeroBytesWritten() throws Exception
+	{
+		// Arrange
+		//
+		FileChannel mock_fc = mock(FileChannel.class);
+		IOException ex = new IOException("Boom");
+		when(mock_fc.write(any(ByteBuffer.class))).thenThrow(ex);
+
+		// Act
+		//
+		int written = FileUtil.string2file("abc", mock_fc);
+
+		// Assert
+		//
+		assertEquals(0, written);
 	}
 
 	@Test(expected = NullPointerException.class)

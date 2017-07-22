@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FileUtil
 {
-	// TODO Test this class
 	public static List<String> filesMatchingPatterns(Path path, String[] patterns, boolean caseSensitive)
 	{
 		if (path == null || patterns == null || patterns.length == 0)

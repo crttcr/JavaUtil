@@ -149,11 +149,6 @@ public class Stdio
 			return null;
 		}
 
-		if (choices.size() == 0)
-		{
-			return null;
-		}
-
 		if (prompt == null || prompt.trim().length() == 0)
 		{
 			prompt = "Chose among the following items: ";
@@ -226,45 +221,6 @@ public class Stdio
 		}
 	}
 
-	public String promptString(String prompt, String def)
-	{
-		if (prompt == null || prompt.length() == 0)
-		{
-			prompt = "input? ";
-		}
-
-		try
-		{
-			System.out.print(prompt);
-			String input = in.readLine();
-			if (input == null || input.length() == 0)
-			{
-				return def == null ? "" : def;
-			}
-			return input;
-		}
-		catch (Exception e)
-		{
-			System.out.println("getString() exception, returning empty string");
-			return "";
-		}
-	}
-
-	// Read a char from standard system input
-	//
-	public char getChar()
-	{
-		String s = getString();
-		if (s.length() >= 1)
-		{
-			return s.charAt(0);
-		}
-		else
-		{
-			return '\n';
-		}
-	}
-
 	public Number getNumber()
 	{
 		String s = getString();
@@ -282,7 +238,7 @@ public class Stdio
 		}
 	}
 
-	public Integer getInt()
+	public Integer getInteger()
 	{
 		Number n = getNumber();
 		if (n == null)
@@ -293,17 +249,22 @@ public class Stdio
 		return n.intValue();
 	}
 
-	public Integer getInt(String prompt)
+	public Integer getInteger(String prompt)
 	{
-		// FIXME PROMPT USER FOR INTEGER VALUE
-		//
-		Number n = getNumber();
-		if (n == null)
-		{
-			return null;
-		}
+		// FIXME: Implement and test
+		return null;
+	}
 
-		return n.intValue();
+	public Integer getIntegerWithDefault(String prompt, int dv)
+	{
+		// FIXME: Implement and test
+		return null;
+	}
+
+	public Integer getIntegerFromListWithDefault(String prompt, int[] choices, int dv)
+	{
+		// FIXME: Implement and test
+		return null;
 	}
 
 	public Float getFloat()
@@ -364,7 +325,7 @@ public class Stdio
 		return dv;
 	}
 
-	public <E extends Enum<E>> E promptForEnumValue(String prompt, Class<E> enumClass)
+	public <E extends Enum<E>> E getEnum(String prompt, Class<E> enumClass)
 	{
 		Objects.requireNonNull(enumClass);
 
@@ -396,11 +357,11 @@ public class Stdio
 		throw new RuntimeException(msg);
 	}
 
-	public String promptForFileMatchingPattern(String prompt, Path path, String ... patterns)
+	public String getFileMatchingPattern(String prompt, Path path, String ... patterns)
 	{
 		Objects.requireNonNull(path);
 
-		if (patternArgumentIsNotValid(patterns))
+		if (! patternArgumentIsValid(patterns))
 		{
 			throw new IllegalArgumentException("Patterns requires a least one pattern an no null values");
 		}
@@ -417,7 +378,7 @@ public class Stdio
 		return choice;
 	}
 
-	private boolean patternArgumentIsNotValid(String[] patterns)
+	private boolean patternArgumentIsValid(String[] patterns)
 	{
 		if (patterns == null)
 		{
