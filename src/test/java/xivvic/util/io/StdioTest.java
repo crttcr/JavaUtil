@@ -685,13 +685,13 @@ public class StdioTest
 
 
 	@Test(expected = NullPointerException.class)
-	public void onPFEVWD_withNullDefault_thenThrowException()
+	public void onGetEnumWithDefault_withNullDefault_thenThrowException()
 	{
-		subject.promptForEnumValueWithDefault("Pick one", null);
+		subject.getEnumWithDefault("Pick one", null);
 	}
 
 	@Test
-	public void onPFEVWD_withNullPrompt_thenUseStandardPrompt()
+	public void onGetEnumWithDefault_withNullPrompt_thenUseStandardPrompt()
 	{
 		// Arrange
 		//
@@ -702,7 +702,7 @@ public class StdioTest
 
 		// Act
 		//
-		TimeUnit result = subject.promptForEnumValueWithDefault(prompt, dv);
+		TimeUnit result = subject.getEnumWithDefault(prompt, dv);
 
 		// Assert
 		//

@@ -289,7 +289,7 @@ public class Stdio
 		return n.doubleValue();
 	}
 
-	public <E extends Enum<E>> E promptForEnumValueWithDefault(String prompt, E dv)
+	public <E extends Enum<E>> E getEnumWithDefault(String prompt, E dv)
 	{
 		Objects.requireNonNull(dv);
 
