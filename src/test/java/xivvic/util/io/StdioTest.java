@@ -797,6 +797,10 @@ public class StdioTest
 		// Assert
 		//
 		assertNull(result);
+
+		// Cleanup
+		//
+		Files.delete(temp);
 	}
 
 

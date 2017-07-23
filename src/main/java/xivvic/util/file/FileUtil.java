@@ -24,11 +24,11 @@ public class FileUtil
 			return Collections.emptyList();
 		}
 
-		final Predicate<String> test = t ->
+		final Predicate<String> test = s ->
 		{
 			for (String p : patterns)
 			{
-				if (t.matches(p))
+				if (s.matches(p))
 				{
 					return true;
 				}
