@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,6 +29,61 @@ public class FileUtilTest
 	private static final String[] JAVA_FILE_PATTERN_LIST = { ".*\\.java" };
 
 	@Mock FileChannel channel;
+
+	@Test
+	public void onGetPaths_withNullPath_thenReturnEmptyList() throws Exception
+	{
+		assertTrue(FileUtil.getPaths(null, FileUtil.PATH_PREDICATE_TRUE).isEmpty());
+	}
+
+	@Test
+	public void onGetPaths_withNullTest_thenReturnAllFiles() throws Exception
+	{
+		// Arrange
+		//
+		File  tmp = File.createTempFile("/tmp", ".junk.tmp");
+		Path path = tmp.toPath().getParent();
+
+		// Act
+		//
+		List<Path> result = FileUtil.getPaths(path, null);
+
+		// Assert
+		//
+		assertNotNull(result);
+		assertTrue(result.size() >= 1);
+
+		// Cleanup
+		//
+		tmp.delete();
+	}
+
+	@Test
+	public void onGetPaths_withPredicate_thenReturnMatchingFiles() throws Exception
+
+	{
+		// Arrange
+		//
+		String                     suffix = "funky.junk.tmp";
+		File                          tmp = File.createTempFile("/tmp", suffix);
+		File                         tmp2 = File.createTempFile("/tmp", suffix + ".foo");
+		DirectoryStream.Filter<Path> test = p -> p.toString().endsWith(suffix);
+		Path                         path = tmp.toPath().getParent();
+
+		// Act
+		//
+		List<Path> result = FileUtil.getPaths(path, test);
+
+		// Assert
+		//
+		assertNotNull(result);
+		assertEquals(1, result.size());
+
+		// Cleanup
+		//
+		tmp.delete();
+		tmp2.delete();
+	}
 
 	@Test(expected = NullPointerException.class)
 	public void onOpenOutputChannel_withNull_thenThrowException()

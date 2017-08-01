@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -17,6 +19,40 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FileUtil
 {
+	public static final DirectoryStream.Filter<Path> PATH_PREDICATE_TRUE = p -> true;
+
+	public static List<Path> getPaths(Path path, DirectoryStream.Filter<Path> test)
+	{
+		if (path == null)
+		{
+			String msg = "Path was null. Returning empty list";
+			log.warn(msg);
+			return Collections.emptyList();
+		}
+
+		if (! Files.isDirectory(path))
+		{
+			String msg = "Path was not a directory. Returning empty list";
+			log.warn(msg);
+			return Collections.emptyList();
+		}
+
+		test = test == null ? PATH_PREDICATE_TRUE : test;
+
+		List<Path> rv = new ArrayList<>();
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(path, test))
+		{
+			stream.forEach(rv::add);
+		}
+		catch (IOException e)
+		{
+			log.warn("Exception reading directory list {}: {}", path.toString(), e.getMessage());
+			return Collections.emptyList();
+		}
+
+		return rv;
+	}
+
 	public static List<String> filesMatchingPatterns(Path path, String[] patterns, boolean caseSensitive)
 	{
 		if (path == null || patterns == null || patterns.length == 0)
@@ -49,7 +85,7 @@ public class FileUtil
 		}
 		catch (IOException e)
 		{
-			log.warn("Excetion reading directory list {}: {}", path, e.getMessage());
+			log.warn("Exception reading directory list {}: {}", path, e.getMessage());
 			return Collections.emptyList();
 		}
 	}
