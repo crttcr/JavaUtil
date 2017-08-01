@@ -55,7 +55,7 @@ public class Stdio
 			return null;
 		}
 
-		prompt = prompt.endsWith(" ") ? prompt : prompt + " ";
+		prompt = formatPromptForSingleLine(prompt, prompt);
 
 		try
 		{
@@ -112,10 +112,8 @@ public class Stdio
 			return null;
 		}
 
-		if (prompt == null || prompt.trim().length() == 0)
-		{
-			prompt = "Chose among the following items: ";
-		}
+		String dv = "Choose among the following items:";
+		prompt = formatPromptRequiringNewline(prompt, dv);
 
 		String fmt = "%2d -- %s\n";
 
@@ -149,10 +147,8 @@ public class Stdio
 			return null;
 		}
 
-		if (prompt == null || prompt.trim().length() == 0)
-		{
-			prompt = "Chose among the following items: ";
-		}
+		String backup = "Choose among the following items:";
+		prompt = formatPromptRequiringNewline(prompt, backup);
 
 		String dv = choices.get(def);
 		String fmt = "%2d -- %s\n";
@@ -376,6 +372,36 @@ public class Stdio
 		String choice = getStringFromList(files, prompt);
 
 		return choice;
+	}
+
+	private String formatPromptRequiringNewline(String prompt, String dv)
+	{
+		if (prompt == null || prompt.trim().length() == 0)
+		{
+			prompt = dv == null ? "Prompt:\n" : dv;
+		}
+
+		if (! prompt.endsWith("\n"))
+		{
+			prompt = prompt + "\n";
+		}
+
+		return prompt;
+	}
+
+	private String formatPromptForSingleLine(String prompt, String dv)
+	{
+		if (prompt == null || prompt.trim().length() == 0)
+		{
+			prompt = dv == null ? "Prompt: " : dv;
+		}
+
+		if (! prompt.endsWith(" "))
+		{
+			prompt = prompt + " ";
+		}
+
+		return prompt;
 	}
 
 	private boolean patternArgumentIsValid(String[] patterns)
