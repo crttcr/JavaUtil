@@ -237,4 +237,21 @@ public class TextFormatterTest
 		assertEquals("#----#", TextFormatter.edgedLine('#', '-', 4));
 	}
 
+	@Test
+	public void onEdgedLine_withPositiveInteriorLength_thenReturnLineWithCorrectWidth()
+	{
+		// Arrange
+		//
+		int insideWidth = 10;
+		int  totalWidth = insideWidth + 2;
+
+		// Act
+		//
+		String result = TextFormatter.edgedLine('#', '-', insideWidth);
+
+		// Assert
+		//
+		assertEquals(totalWidth, result.length());
+	}
+
 }
