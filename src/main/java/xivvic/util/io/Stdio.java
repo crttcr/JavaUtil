@@ -148,14 +148,14 @@ public class Stdio
 		}
 
 		String backup = "Choose among the following items:";
-		prompt = formatPromptRequiringNewline(prompt, backup);
+		prompt = formatPromptForSingleLine(prompt, backup);
 
 		String dv = choices.get(def);
 		String fmt = "%2d -- %s\n";
 
 		while (true)
 		{
-			out.printf("%s [%s]", prompt, dv);
+			out.printf("%s [%s]\n", prompt, dv);
 			for (int i = 0; i < choices.size(); i++)
 			{
 				out.printf(fmt, i, choices.get(i));
@@ -473,4 +473,8 @@ public class Stdio
 	}
 
 
+	public void output(String msg)
+	{
+		out.println(msg);
+	}
 }

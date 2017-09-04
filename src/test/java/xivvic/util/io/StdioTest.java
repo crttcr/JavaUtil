@@ -803,6 +803,40 @@ public class StdioTest
 		Files.delete(temp);
 	}
 
+	@Test
+	public void onPrompt_withValidMessage_thenPrintMessageContent()
+	{
+		// Arrange
+		//
+		String msg = "Hello Patrice";
+
+		// Act
+		//
+		subject.output(msg);
+		String output = out_bytes.toString();
+
+		// Assert
+		//
+		assertNotNull(output);
+		assertTrue(output.contains(msg));
+
+	}
+
+	@Test
+	public void onPrompt_withNullMessage_thenPrintNull()
+	{
+		// Act
+		//
+		subject.output(null);
+		String output = out_bytes.toString();
+
+		// Assert
+		//
+		assertNotNull(output);
+		assertTrue(output.contains("null"));
+
+	}
+
 
 	///////////////////////////////
 	// Helpers                   //
