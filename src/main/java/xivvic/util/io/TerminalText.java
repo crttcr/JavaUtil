@@ -29,25 +29,25 @@ public class TerminalText {
 
 	public enum Code
 	{
-		BLACK        ("\033[30m",   "\033[39m"),
-		RED          ("\033[31m",   "\033[39m"),
-		RED_BOLD     ("\033[31;1m", "\033[39m"),
-		GREEN		    ("\033[32m",   "\033[39m"),
-		GREEN_BOLD   ("\033[32;1m", "\033[39m"),
-		YELLOW	    ("\033[33m",   "\033[39m"),
-		YELLOW_BOLD	 ("\033[33;1m", "\033[39m"),
-		BLUE    	    ("\033[34m",   "\033[39m"),
-		BLUE_BOLD    ("\033[34;1m", "\033[39m"),
-		MAGENTA    	 ("\033[35m",   "\033[39m"),
-		MAGENTA_BOLD ("\033[35;1m", "\033[39m"),
-		CYAN    	    ("\033[36m",   "\033[39m"),
-		CYAN_BOLD    ("\033[36;1m", "\033[39m"),
-		GRAY		    ("\033[37m",   "\033[39m"),
-		GRAY_BOLD	 ("\033[37;1m", "\033[39m"),
-		DARK_GRAY      ("\033[38m", "\033[39m"),
+		BLACK          ("\033[30m",   "\033[39m"),
+		RED            ("\033[31m",   "\033[39m"),
+		RED_BOLD       ("\033[31;1m", "\033[39m"),
+		GREEN		      ("\033[32m",   "\033[39m"),
+		GREEN_BOLD     ("\033[32;1m", "\033[39m"),
+		YELLOW	      ("\033[33m",   "\033[39m"),
+		YELLOW_BOLD	   ("\033[33;1m", "\033[39m"),
+		BLUE    	      ("\033[34m",   "\033[39m"),
+		BLUE_BOLD      ("\033[34;1m", "\033[39m"),
+		MAGENTA    	   ("\033[35m",   "\033[39m"),
+		MAGENTA_BOLD   ("\033[35;1m", "\033[39m"),
+		CYAN    	      ("\033[36m",   "\033[39m"),
+		CYAN_BOLD      ("\033[36;1m", "\033[39m"),
+		GRAY		      ("\033[37m",   "\033[39m"),
+		GRAY_BOLD	   ("\033[37;1m", "\033[39m"),
+		DARK_GRAY      ("\033[38m",   "\033[39m"),
 		DARK_GRAY_BOLD ("\033[38;1m", "\033[39m"),
-		UNDERLINE 	   ("\033[4m",  "\033[24m"),
-		BOLD   		   ("\033[1m",   "\033[0m"), // reset *all* attributes; reset bold not supported on BSD
+		UNDERLINE 	   ("\033[4m",    "\033[24m"),
+		BOLD   		   ("\033[1m",    "\033[0m"), // reset *all* attributes; reset bold not supported on BSD
 		;
 
 		protected String code, reset;
