@@ -54,7 +54,7 @@ public class TerminalText {
 
 		Code(String code, String reset)
 		{
-			this.code = code;
+			this.code  = code;
 			this.reset = reset;
 		}
 
@@ -67,10 +67,6 @@ public class TerminalText {
 
 			return code + text + reset;
 		}
-		@Override
-		public String toString()
-		{
-			return code;
-		}
+
 	}
 }
